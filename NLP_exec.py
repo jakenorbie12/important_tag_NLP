@@ -20,7 +20,6 @@ from sklearn.metrics import accuracy_score
 get_ipython().run_line_magic('matplotlib', 'inline')
 df_name = input("Enter the name of the file: ")
 df = pd.read_csv(df_name, sep='\t', encoding='unicode_escape')
-# Dataset_08-29-2019.txt
 
 
 # In[2]:
