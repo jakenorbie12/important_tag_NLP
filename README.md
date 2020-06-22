@@ -46,3 +46,4 @@ For any issues you may have, please feel free to email me at jakenorbie@gmail.co
 
 ## Licensing
 
+Jake Norbie & Co.
