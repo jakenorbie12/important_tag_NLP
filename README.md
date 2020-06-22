@@ -1,7 +1,7 @@
 # Important Tag Natural Language Processor
 
 ## Purpose
-This contains various files pertaining to the generation of a lightGBM model designed to classify words by tags and also use the current model to predict data. Some are in Jupyter Notebook format, while others are in truncated .py file formats.
+This contains various files pertaining to the generation of a lightGBM model designed to classify words by tags and also use the current model to predict data. The couple of files have names that are self-expanatory of their functions, but I will more thoroughly describe their use later in this readme.
 
 ## Project Description
 
