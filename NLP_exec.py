@@ -56,6 +56,7 @@ def backWord(x):
         return
 
 tagArray = df.Tag.unique().tolist()
+
 def Tag2Num(x):
     return tagArray.index(x)
 
