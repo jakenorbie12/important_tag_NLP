@@ -12,7 +12,6 @@ df_name = input("Enter the name of the file: ")
 df_name_orig = input("Enter the name of the file used for ")
 df = pd.read_csv(df_name, sep='\t', encoding='unicode_escape')
 df_new = df.copy()
-# Dataset_08-29-2019.txt
 
 
 # In[3]:
@@ -98,9 +97,10 @@ y_hat = [np.argmax(line) for line in y_pred]
 
 # In[11]:
 
-
+#Sets the name for the new file
+new_name = 'New_Data.csv'
 df_new['Tag'] = y_hat
-df_new.to_csv('New_Data.csv', encoding = 'unicode-escape')
+df_new.to_csv(new_name, encoding = 'unicode-escape')
 
 
 # In[ ]:
