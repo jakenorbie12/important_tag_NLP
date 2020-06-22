@@ -19,9 +19,9 @@ I used anaconda and git to import and use all files. You semi-current versions a
 ## Installation
 
 1) To download the github repository, simply navigate to the folder you want to use and type this command in git bash:
-'''
+```
 git clone https://github.com/jakenorbie12/important_tag_NLP.git
-'''
+```
 
 2) Everything should be there!
 
