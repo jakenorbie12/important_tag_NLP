@@ -12,6 +12,12 @@ The project consists of many files, but there are three important aspects:
 
 ## Index
 
+1. Dependencies
+2. Installation
+3. Usage of Files
+4. Troubleshooting
+5. Licensing
+
 ## Dependencies
 
 I used anaconda and git to import and use all files. You semi-current versions and you should be fine. You can use others but I don't know how to accurately use them.
@@ -25,9 +31,18 @@ git clone https://github.com/jakenorbie12/important_tag_NLP.git
 
 2) Everything should be there!
 
-# Usage of Files
+## Usage of Files
 
-# Model Generation
+### Model Generation
 
 1) In anaconda navigate to the folder using cd and then type this:
+```
 ipython NLP_mod_gen.py
+```
+
+## Troubleshooting
+
+For any issues you may have, please feel free to email me at jakenorbie@gmail.com.
+
+## Licensing
+
