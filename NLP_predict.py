@@ -93,7 +93,7 @@ data_test = df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherC
            'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
 light_model = lgb.Booster(model_file = 'model.txt')
 y_pred = light_model.predict(data_test)
-y_hat = [np.argmax(line) for line in y_pred2]
+y_hat = [np.argmax(line) for line in y_pred]
 
 
 # In[11]:
