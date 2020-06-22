@@ -39,6 +39,31 @@ git clone https://github.com/jakenorbie12/important_tag_NLP.git
 ```
 ipython NLP_mod_gen.py
 ```
+2) Type in the file you want to use to generate the model. 
+
+3) This uses lightGBM to create a Model and saves it under "model.txt". If you want to change the name go to line 162 or under the comment that says "#Save the model".
+
+4) Also, it is important to note that an accuracy score, F1 score, and confusion matrix will show unless commented out.
+
+### Testing Data
+
+1) In anaconda navigate to the folder using cd and then type:
+```
+ipython NLP_exec.py
+```
+2) Type in the file you want to use to test the data.
+
+3) Using the model, it tests the data against the true data to show the accuracy and confusion matrix.
+
+### Predicting Data/Using the Model
+
+1) In anaconda type in:
+```
+ipython NLP_predict.py
+```
+2) Type in the name of the file you want to use
+
+3) Note: The data will be output into a new file named "New_Data.csv". To change this go to line 101 or the comment "#Sets the name for the new file" and change it.
 
 ## Troubleshooting
 
