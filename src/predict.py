@@ -6,7 +6,6 @@
 
 import pandas as pd
 import numpy as np
-import sklearn as sk
 import lightgbm as lgb
 df_name = input("Enter the name of the file: ")
 df = pd.read_csv(df_name, sep='\t', encoding='unicode_escape')
