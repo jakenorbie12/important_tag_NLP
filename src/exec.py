@@ -6,15 +6,10 @@
 
 import pandas as pd
 import numpy as np
-import sklearn as sk
 import matplotlib.pyplot as plt
 import seaborn as sn
-import wheel
-import setuptools
-import scipy
 import lightgbm as lgb
 import random
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 get_ipython().run_line_magic('matplotlib', 'inline')
