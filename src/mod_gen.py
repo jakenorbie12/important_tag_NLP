@@ -8,7 +8,7 @@ import sys
 ROOT_DIR = os.path.abspath("../config")
 sys.path.append(ROOT_DIR)
 #TO FIX: CAN'T FIND CONFIG 
-import config.data_config as Dconfig
+#import config.data_config as Dconfig
 
 import argparse
 
@@ -28,8 +28,6 @@ def propVow(x):
             numVow += 1
     return numVow / len(x)
 
-word_array = df.Word.unique().tolist()
-
 def frontWord(x):
     if x > 0:
         return word_array.index(df['Word'][x-1])
@@ -41,13 +39,12 @@ def backWord(x):
     else:
         return
 
-array = df.Tag.unique().tolist()
-
 def Tag2Num(x):
     return array.index(x)
 
 
-def feature_gen(filename = Dconfig.DATASET_PATH):
+#def feature_gen(filename = Dconfig.DATASET_PATH):
+def feature_gen(filename = '../data/original/Dataset_08-29-2019.txt'):
 
     df = pd.read_csv(filename, sep='\t', encoding='unicode_escape')
     
@@ -77,15 +74,18 @@ def feature_gen(filename = Dconfig.DATASET_PATH):
 
     df['propVow'] = df['Word'].apply(lambda x: propVow(x))
 
+    array = df.Tag.unique().tolist()
     df['TagNum'] = df['Tag'].apply(lambda x: Tag2Num(x))
 
+    word_array = df.Word.unique().tolist()
     df['frontWord'] = df['Unnamed: 0'].apply(lambda x: frontWord(x))
 
     df['backWord'] = df['Unnamed: 0'].apply(lambda x: backWord(x))
 
     df.to_csv(filename, encoding = 'unicode-escape')
 
-def data_split(filename = Dconfig.DATASET_PATH):
+#def data_split(filename = Dconfig.DATASET_PATH):
+def data_split(filename = '../data/original/Dataset_08-29-2019.txt'):
     df = pd.read_csv(filename, sep='\t', encoding='unicode_escape')
     
     sentences_group = df.groupby(['Sentence #'])
