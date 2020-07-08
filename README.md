@@ -29,7 +29,12 @@ I used anaconda and git to import and use all files. You semi-current versions a
 git clone https://github.com/jakenorbie12/important_tag_NLP.git
 ```
 
-2) Everything should be there!
+2) To install dependences, in anaconda navigate to the directory and type:
+```
+conda install --file installation/requirements.txt
+```
+
+3)You should be all good to go!
 
 ## Usage of Files
 
@@ -37,7 +42,7 @@ git clone https://github.com/jakenorbie12/important_tag_NLP.git
 
 1) In anaconda navigate to the folder using cd and then type this:
 ```
-ipython NLP_mod_gen.py
+python src/dataset.py feature_gen
 ```
 2) Type in the file you want to use to generate the model. 
 
@@ -49,7 +54,7 @@ ipython NLP_mod_gen.py
 
 1) In anaconda navigate to the folder using cd and then type:
 ```
-ipython NLP_exec.py
+python src/predict.py evaluate
 ```
 2) Type in the file you want to use to test the data.
 
@@ -59,7 +64,7 @@ ipython NLP_exec.py
 
 1) In anaconda type in:
 ```
-ipython NLP_predict.py
+ipython src/predict.py predict
 ```
 2) Type in the name of the file you want to use
 
