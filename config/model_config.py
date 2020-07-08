@@ -3,8 +3,8 @@
 #===============================================================================
 PARAMETERS = {}
 #Don't change these!
-PARAMETERS['objective'] = multiclass
-PARAMETERS['num_classes'] = 15
+PARAMETERS['objective'] = 'multiclass'
+PARAMETERS['num_classes'] = 17
 #Change these!
 PARAMETERS['learning_rate'] = 0.03
 

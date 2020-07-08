@@ -85,7 +85,7 @@ def feature_gen_4_pred(filename = Dconfig.PRED_DATASET_PATH):
 
     return df
 
-
+'''
 def data_split(filename = Dconfig.FEATURES_DATASET_PATH):
     
     logging.info('Data Splitting has begun.')
@@ -122,7 +122,7 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH):
 
     logging.info('Split complete')
 
-
+'''
 
 
 

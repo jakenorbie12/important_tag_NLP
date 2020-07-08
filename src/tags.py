@@ -22,10 +22,11 @@ def train():
 
         logging.info('Beginning model training...')
         data_train = np.loadtxt(Dconfig.DATA_TRAIN_PATH)
-        label_train = np.loadtxt(Dconfig.DATA_TRAIN_PATH)
+        label_train = np.loadtxt(Dconfig.LABEL_TRAIN_PATH)
 
         d_train = lgb.Dataset(data_train, label=label_train)
         params = Mconfig.PARAMETERS
+        #Problem here: \/
         mod = lgb.train(params, d_train, 100)
         logging.info('Training complete. Saving to file.')
 
@@ -35,8 +36,8 @@ def train():
 def evaluate():
 
         logging.info('Beginning evaluation of model using data')
-        data_test = np.loadtxt(Dconfig.DATA_TRAIN_PATH)
-        label_test = np.loadtxt(Dconfig.DATA_TRAIN_PATH)
+        data_test = np.loadtxt(Dconfig.DATA_TEST_PATH)
+        label_test = np.loadtxt(Dconfig.LABEL_TEST_PATH)
         light_model = lgb.Booster(model_file = Mconfig.MODEL_PATH)
 
         prediction_data = light_model.predict(data_test)
