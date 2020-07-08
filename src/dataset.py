@@ -113,15 +113,15 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH):
 
     data_train = train_df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
                'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
-    valid_train = train_df['TagNum'].values
+    label_train = train_df['TagNum'].values
     data_test = test_df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
                'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
-    valid_test = test_df['TagNum'].values
+    label_test = test_df['TagNum'].values
 
-    np.savetxt('./data/original/data_train.txt', data_train)
-    np.savetxt('./data/original/valid_train.txt', valid_train)
-    np.savetxt('./data/original/data_test.txt', data_test)
-    np.savetxt('./data/original/valid_test.txt', valid_test)
+    np.savetxt(Dconfig.DATA_TRAIN_PATH, data_train)
+    np.savetxt(Dconfig.LABEL_TRAIN_PATH, label_train)
+    np.savetxt(Dconfig.DATA_TEST_PATH, data_test)
+    np.savetxt(Dconfig.LABEL_TEST_PATH, label_test)
 
     logging.info('Split complete')
 
