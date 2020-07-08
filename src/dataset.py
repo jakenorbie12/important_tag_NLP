@@ -2,6 +2,7 @@
 #     Data Transformation and Splitting
 #===============================================================================
 import pandas as pd
+import numpy as np
 import random
 import os
 import sys
@@ -30,22 +31,19 @@ def propVow(x):
             numVow += 1
     return numVow / len(x)
 
-def frontWord(x, df):
-    word_array = df.Word.unique().tolist()
+def frontWord(x, array, df):
     if x > 0:
-        return word_array.index(df['Word'][x-1])
+        return array.index(df['Word'][x-1])
     else:
         return
     
-def backWord(x, df):
-    word_array = df.Word.unique().tolist()
+def backWord(x, array, df):
     if x < len(df.index) - 1:
-        return word_array.index(df['Word'][x+1])
+        return array.index(df['Word'][x+1])
     else:
         return
 
-def Tag2Num(x, df):
-    array = df.Tag.unique().tolist()
+def Tag2Num(x, array):
     return array.index(x)
 
 def feature_gen(filename = Dconfig.DATASET_PATH):
@@ -80,21 +78,21 @@ def feature_gen(filename = Dconfig.DATASET_PATH):
     df['propVow'] = df['Word'].apply(lambda x: propVow(x))
 
     logging.info('Simple features have been generated, moving on to difficult features')
-    #takes an unusually long time... ask Mike or troubleshoot later
-    df['TagNum'] = df['Tag'].apply(lambda x: Tag2Num(x, df))
+    tag_array = df.Tag.unique().tolist()
+    df['TagNum'] = df['Tag'].apply(lambda x: Tag2Num(x, tag_array))
+    word_array = df.Word.unique().tolist()
+    df['frontWord'] = df['Unnamed: 0'].apply(lambda x: frontWord(x, word_array, df))
 
-    df['frontWord'] = df['Unnamed: 0'].apply(lambda x: frontWord(x, df))
-
-    df['backWord'] = df['Unnamed: 0'].apply(lambda x: backWord(x, df))
+    df['backWord'] = df['Unnamed: 0'].apply(lambda x: backWord(x, word_array, df))
 
     logging.info('All features done... saving to file')
     
     df.to_csv(Dconfig.FEATURES_DATASET_PATH, encoding = 'unicode-escape')
 
 def data_split(filename = Dconfig.FEATURES_DATASET_PATH):
-    #still need to check to see if it works
+    
     logging.info('Data Splitting has begun.')
-    df = pd.read_csv(filename, sep='\t', encoding='unicode_escape')
+    df = pd.read_csv(filename, encoding='unicode_escape')
     
     sentences_group = df.groupby(['Sentence #'])
     test_sentences = []
@@ -121,9 +119,9 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH):
     valid_test = test_df['TagNum'].values
 
     np.savetxt('./data/original/data_train.txt', data_train)
-    np.savetxt('./data/original/data_train.txt', valid_train)
-    np.savetxt('./data/original/data_train.txt', data_test)
-    np.savetxt('./data/original/data_train.txt', valid_test)
+    np.savetxt('./data/original/valid_train.txt', valid_train)
+    np.savetxt('./data/original/data_test.txt', data_test)
+    np.savetxt('./data/original/valid_test.txt', valid_test)
 
     logging.info('Split complete')
 

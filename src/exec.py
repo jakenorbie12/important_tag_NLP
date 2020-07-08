@@ -12,7 +12,7 @@ import lightgbm as lgb
 import random
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 df_name = input("Enter the name of the file: ")
 df = pd.read_csv(df_name, sep='\t', encoding='unicode_escape')
 
