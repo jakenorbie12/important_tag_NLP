@@ -26,7 +26,6 @@ def train():
 
         d_train = lgb.Dataset(data_train, label=label_train)
         params = Mconfig.PARAMETERS
-        #Problem here: \/
         mod = lgb.train(params, d_train, 100)
         logging.info('Training complete. Saving to file.')
 
@@ -45,6 +44,7 @@ def evaluate():
         logging.info('Complete. Generating accuracy score and confusion matrix')
         accuracy = accuracy_score(classed_data, label_test)
         cm = confusion_matrix(label_test, classed_data)
+        print('\n')
         print("Accuracy = " + str(accuracy))
         print('\n')
         print('Confusion Matrix:')

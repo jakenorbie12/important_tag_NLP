@@ -85,45 +85,6 @@ def feature_gen_4_pred(filename = Dconfig.PRED_DATASET_PATH):
 
     return df
 
-'''
-def data_split(filename = Dconfig.FEATURES_DATASET_PATH):
-    
-    logging.info('Data Splitting has begun.')
-    df = pd.read_csv(filename, encoding='unicode_escape')
-    
-    sentences_group = df.groupby(['Sentence #'])
-    test_sentences = []
-    test_dfs = []
-    train_dfs = []
-    for i in range(750):
-        found = False
-        while found == False:
-            num = random.randint(1, 2999)
-            if not num in test_sentences:
-                test_sentences.append(num)
-                test_dfs.append(sentences_group.get_group(num))
-                found = True
-            
-    test_df = pd.concat(test_dfs)
-    drop_list = test_df['Unnamed: 0'].tolist()
-    train_df = df.copy().drop(drop_list)
-
-    data_train = train_df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
-               'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
-    label_train = train_df['TagNum'].values
-    data_test = test_df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
-               'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
-    label_test = test_df['TagNum'].values
-
-    np.savetxt(Dconfig.DATA_TRAIN_PATH, data_train)
-    np.savetxt(Dconfig.LABEL_TRAIN_PATH, label_train)
-    np.savetxt(Dconfig.DATA_TEST_PATH, data_test)
-    np.savetxt(Dconfig.LABEL_TEST_PATH, label_test)
-
-    logging.info('Split complete')
-
-'''
-
 
 
 
