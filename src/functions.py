@@ -15,8 +15,7 @@ import argparse
 
 logging.basicConfig(level=logging.INFO)
 
-#Functions
-
+#Functions for the feature generation function
 def otherCap(x):
     for letter in x:
         if letter.isupper():
@@ -44,11 +43,20 @@ def backWord(x, array, df):
         return
 
 
-def feature_gen_4_pred(filename = Dconfig.PRED_DATASET_PATH):
-    
+def feature_gen_4_pred(df):
+    '''
+    The feature generation function but modified for unlabelled prediction data
+    +Input:
+        df: the dataframe to have features added onto it
+    +Output:
+        the completed dataframe
+    '''
+
+    #Takes the filepath and writes in the csv file as a Pandas Dataframe
     logging.info('Feature Generation has begun')
-    df = pd.read_csv(filename, sep='\t', encoding='unicode_escape')
-    
+
+    #Generates new columns of the dataframe based on various features
+    #(capitalization, if one is a part of speech, etc.). These are stored as numbers
     df['isFirstCap'] = df['Word'].apply(lambda x: 1 if x[0].isupper() else 0)
 
     df['Length'] = df['Word'].apply(lambda x: len(x))
@@ -83,6 +91,7 @@ def feature_gen_4_pred(filename = Dconfig.PRED_DATASET_PATH):
 
     logging.info('All features done...')
 
+    #returns the newly featured dataframe
     return df
 
 

@@ -15,7 +15,7 @@ import argparse
 
 logging.basicConfig(level=logging.INFO)
 
-#Functions
+#Functions for Feature Generation
 
 def otherCap(x):
     for letter in x:
@@ -46,11 +46,21 @@ def backWord(x, array, df):
 def Tag2Num(x, array):
     return array.index(x)
 
+
 def feature_gen(filename = Dconfig.DATASET_PATH):
-    
+    '''
+    Generates various features for a dataframe to use for modelling
+    the new data will now be sent to a file specified in configs
+    +Inputs:
+        filename: the path of file that holds the data
+    '''
+
+    #Reads the file (a csv but can be txt) and sets it to a Pandas dataframe
     logging.info('Feature Generation has begun')
     df = pd.read_csv(filename, sep='\t', encoding='unicode_escape')
-    
+
+    #Generates new columns of the dataframe based on various features
+    #(capitalization, if one is a part of speech, etc.). These are stored as numbers
     df['isFirstCap'] = df['Word'].apply(lambda x: 1 if x[0].isupper() else 0)
 
     df['Length'] = df['Word'].apply(lambda x: len(x))
@@ -86,33 +96,49 @@ def feature_gen(filename = Dconfig.DATASET_PATH):
     df['backWord'] = df['Unnamed: 0'].apply(lambda x: backWord(x, word_array, df))
 
     logging.info('All features done... saving to file')
-    
+
+    #Saves the new dataframe as a csv file    
     df.to_csv(Dconfig.FEATURES_DATASET_PATH, encoding = 'unicode-escape')
 
+
 def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
-    
+    '''
+    Splits the data into training and testing batches, and saves them
+    +Inputs:
+        filename: the name of the filepath for the featured dataset
+        mode: can either split the data into training and testing, or
+            set all to testing, or set all to training
+    '''
+
+    #Reads the featured csv file and writes it in as a Pandas dataframe
     logging.info('Data Splitting has begun.')
     df = pd.read_csv(filename, encoding='unicode_escape')
 
+    #If the mode is set to both training and testing
     if mode == "BOTH":
-        
+
+        #Splits the words by sentence, and then randomly takes 25% 
+        #of them and puts them into the testing set
         sentences_group = df.groupby(['Sentence #'])
         test_sentences = []
         test_dfs = []
         train_dfs = []
-        for i in range(750):
+        max_sent = int(df['Sentence #'].max())
+        for i in range(round(max_sent / 4)):
             found = False
             while found == False:
-                num = random.randint(1, 2999)
+                num = random.randint(1, max_sent)
                 if not num in test_sentences:
                     test_sentences.append(num)
                     test_dfs.append(sentences_group.get_group(num))
                     found = True
-                
+
+        #takes the testing sentences, and removes them from the training set        
         test_df = pd.concat(test_dfs)
         drop_list = test_df['Unnamed: 0'].tolist()
         train_df = df.copy().drop(drop_list)
 
+        #takes the data and labels of the training and testing sets, and puts them in txt files
         data_train = train_df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
         label_train = train_df['TagNum'].values
@@ -127,7 +153,11 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         logging.info('Split complete')
 
+    #If the mode is set to evaluation (all testing)
     elif mode == "EVAL":
+
+        #Takes all of the data and splits the data from label columns and saves them in txt files
+        #for testing
         data_test = df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
         label_test = df['TagNum'].values
@@ -136,7 +166,11 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         logging.info('Full evaluation split complete')
 
+    #If the mode is set to all training
     elif mode == "TRAIN":
+
+        #Takes all of the data and splits the data from label columns and saves them in txt files
+        #for training
         data_train = df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
         label_train = df['TagNum'].values
@@ -145,22 +179,25 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         logging.info('Full train split complete')
 
+    #If the mode is set to a nonvalid mode
     else:
-        
-        logging.info('Please put in a valid mode, or none to do a normal split')
-
-    
+        logging.debug('Please put in a valid mode, or none to do a normal split')
 
 
+#argparse code to allow command line functionality
 parser = argparse.ArgumentParser(description='Methods for feature generation and splitting of data')
-parser.add_argument("command", metavar="<command>", help="'feature_gen' or 'split'",)
+parser.add_argument("command", metavar="<command>", help="'feature_gen' or 'split' or 'split_eval' or 'split_train'",)
 args = parser.parse_args()
-assert args.command in ['feature_gen', 'split'], "invalid parsing 'command'"
+assert args.command in ['feature_gen', 'split', 'split_eval', 'split_train'], "invalid parsing 'command'"
 
 if args.command == "feature_gen":
         feature_gen()      
-else:
+elif args.command == "split":
         data_split()
+elif args.command == "split_eval":
+    data_split(mode = 'EVAL')
+else:
+    data_split(mode = 'TRAIN')
 
 
 
