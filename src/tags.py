@@ -2,6 +2,7 @@
 #     Tags Runner
 #===============================================================================
 import argparse
+import pandas as pd
 import lightgbm as lgb
 import numpy as np
 from sklearn.metrics import confusion_matrix
@@ -9,7 +10,7 @@ from sklearn.metrics import accuracy_score
 import os
 import sys
 import logging
-import functions
+import dataset
 ROOT_DIR = os.path.abspath("./config")
 sys.path.append(ROOT_DIR)
 import data_config as Dconfig
@@ -18,9 +19,11 @@ import model_config as Mconfig
 logging.basicConfig(level=logging.INFO)
 
 
-def train():
+def train(model_path = Mconfig.MODEL_PATH):
         '''
         Takes the data and labels and trains a model
+        +Input:
+                model_path: the filepath to the model
         '''
 
         #Loads in the data and labels from the training set
@@ -38,16 +41,21 @@ def train():
         logging.info('Training complete. Saving to file.')
 
         #Saves the finished model into the filepath preset in the configs
-        mod.save_model(Mconfig.MODEL_PATH)
+        mod.save_model(model_path)
         logging.info('Finished')
 
-def evaluate():
+def evaluate(mod_file = Mconfig.MODEL_PATH):
+        '''
+        Evaluates model by giving an accuracy score and confusion matrix
+        +Input:
+                model_path: the filepath to the model
+        '''
 
         #Loads in the data, labels, and model
         logging.info('Beginning evaluation of model using data')
         data_test = np.loadtxt(Dconfig.DATA_TEST_PATH)
         label_test = np.loadtxt(Dconfig.LABEL_TEST_PATH)
-        light_model = lgb.Booster(model_file = Mconfig.MODEL_PATH)
+        light_model = lgb.Booster(model_file = mod_file)
 
         #Uses the model to predict the data
         prediction_data = light_model.predict(data_test)
@@ -66,20 +74,26 @@ def evaluate():
         print('Confusion Matrix:')
         print(cm)
 
-def predict():
+def predict(pred_file = Dconfig.PRED_DATASET_PATH):
+        '''
+        Uses the model to predict/identify the tags and saves the new data to a file
+        +Input:
+                pred_file: the filepath for the dataset to be predicted
+        '''
 
         #Creates a featured Pandas dataframe from a csv file
         logging.info('Commensing prediction of data...')
-        df = pd.read_csv(Dconfig.PRED_DATASET_PATH, sep='\t', encoding='unicode_escape')
+        df = pd.read_csv(pred_file, sep='\t', encoding='unicode_escape')
 
         #Creates a copy of the dataframe for final usage
         df_final = df.copy()
 
         #Generates features onto the dataframe
-        df = functions.feature_gen_4_pred()
+        df = dataset.feature_gen(mode = 'PREDICT', data = df)
+        logging.info('Done generating features')
 
         #Uses the features to create a viable dataset
-        data = df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
+        data = df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
            'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
 
         #Loads in the model
@@ -91,20 +105,41 @@ def predict():
         logging.info('Prediction completed. Saving data to new file...')
 
         #Puts the tags onto the final dataframe, and saves it to a csv
+        tag_file = open('./data/process/tag_array.txt', 'r')
+        tag_array = tag_file.read()
+        tag_array = tag_array.strip("[]")
+        tag_array = tag_array.split(',')
+        for idx, word in enumerate(tag_array):
+                new_word = word.strip()
+                new_word = new_word.strip("''")
+                tag_array[idx] = new_word
+        classed_data = [tag_array[line] for line in classed_data]
         df_final['Tag'] = classed_data
-        df_final.to_csv(Dconfig.NEW_DATA_PATH, encoding = 'unicode-escape')
+        df_final.to_csv(Dconfig.NEW_DATA_PATH)
+        logging.info('Complete')
 
         
 #argparse code to allow command line functionality
 parser = argparse.ArgumentParser(description='Methods for Model Training, Evaluating and Predicting')
-parser.add_argument("command", metavar="<command>", help="'train', 'evaluate', or 'predict'",)
+parser.add_argument("-c", metavar="<command>", help="'train', 'evaluate', or 'predict'",)
+parser.add_argument("-f", metavar="file", help="input file",)
+parser.add_argument("-mf", metavar="model file", help="model file path",)
 args = parser.parse_args()
 
-assert args.command in ['train', 'evaluate', 'predict'], "invalid parsing 'command'"
+assert args.c in ['train', 'evaluate', 'predict'], "invalid parsing 'command'"
 
-if args.command == "train":
-        train()
-elif args.command == 'evaluate':
-        evaluate()       
+if args.c == "train":
+        if args.mf == None:
+                train()
+        else:
+                train(args.mf)
+elif args.c == 'evaluate':
+        if args.mf == None:
+                evaluate()
+        else:
+                evaluate(args.mf)       
 else:
-        predict()
+        if args.f == None:
+                predict()
+        else:
+                predict(args.f)

@@ -8,7 +8,7 @@ import os
 import sys
 import logging
 ROOT_DIR = os.path.abspath("./config")
-print(ROOT_DIR)
+#print(ROOT_DIR)
 sys.path.append(ROOT_DIR)
 import data_config as Dconfig
 import argparse
@@ -16,6 +16,51 @@ import argparse
 logging.basicConfig(level=logging.INFO)
 
 #Functions for Feature Generation
+
+def isFirstCap(x):
+    if x[0].isupper():
+        return 1
+    else:
+        return 0
+
+def Length(x):
+    return len(x)
+
+def endY(x):
+    if x[-1] == 'y':
+        return 1
+    else:
+        return 0
+
+def endan(x):
+    if x[-2:len(x)] == 'an':
+        return 1
+    else:
+        return 0
+
+def isNum(x):
+    if x.isnumeric():
+        return 1
+    else:
+        return 0
+
+def endS(x):
+    if x[-1] == 's':
+        return 1
+    else:
+        return 0
+    
+def endish(x):
+    if x[-3:len(x)] == 'ish':
+        return 1
+    else:
+        return 0
+
+def endese(x):
+    if x[-3:len(x)] == 'ese':
+        return 1
+    else:
+        return 0
 
 def otherCap(x):
     for letter in x:
@@ -43,63 +88,99 @@ def backWord(x, array, df):
     else:
         return
 
-def Tag2Num(x, array):
+def Array2Num(x, array):
     return array.index(x)
 
 
-def feature_gen(filename = Dconfig.DATASET_PATH):
+def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
     '''
     Generates various features for a dataframe to use for modelling
     the new data will now be sent to a file specified in configs
     +Inputs:
         filename: the path of file that holds the data
+        mode: determines if this is for predicting or training (not predicting) or evaluation
     '''
 
     #Reads the file (a csv but can be txt) and sets it to a Pandas dataframe
     logging.info('Feature Generation has begun')
-    df = pd.read_csv(filename, sep='\t', encoding='unicode_escape')
+
+    if mode == 'TRAIN' or mode == 'EVAL':
+        df = pd.read_csv(filename, sep='\t', encoding='unicode_escape')
+
+    #Takes the parameter dataframe for prediction
+    elif mode == 'PREDICT':
+        df = data
 
     #Generates new columns of the dataframe based on various features
     #(capitalization, if one is a part of speech, etc.). These are stored as numbers
-    df['isFirstCap'] = df['Word'].apply(lambda x: 1 if x[0].isupper() else 0)
-
-    df['Length'] = df['Word'].apply(lambda x: len(x))
-
-    df['endY'] = df['Word'].apply(lambda x: 1 if x[-1] == 'y' else 0)
-
-    df['isNNP'] = df['POS'].apply(lambda x: 1 if x == 'NNP' else 0)
-
-    df['isJJ'] = df['POS'].apply(lambda x: 1 if x == 'JJ' else 0)
-
-    df['isCD'] = df['POS'].apply(lambda x: 1 if x == 'CD' else 0)
-
-    df['otherCap'] = df['Word'].apply(lambda x: otherCap(x))
-
-    df['endan'] = df['Word'].apply(lambda x: 1 if x[-2:len(x)] == 'an' else 0)
-
-    df['isNum'] = df['Word'].apply(lambda x: 1 if x.isnumeric() else 0)
-
-    df['endS'] = df['Word'].apply(lambda x: 1 if x[-1] == 's' else 0)
-
-    df['endish'] = df['Word'].apply(lambda x: 1 if x[-3:len(x)] == 'ish' else 0)
-
-    df['endese'] = df['Word'].apply(lambda x: 1 if x[-3:len(x)] == 'ese' else 0)
-
-    df['propVow'] = df['Word'].apply(lambda x: propVow(x))
+    function_dict = {'isFirstCap': isFirstCap, 'Length': Length, 'endY': endY, 'otherCap': otherCap, 'endan': endan,
+                  'isNum': isNum, 'endS': endS, 'endish': endish, 'endese': endese, 'propVow': propVow}
+    for f in function_dict:
+        df[f] = df['Word'].apply(lambda x: function_dict[f](x))
 
     logging.info('Simple features have been generated, moving on to difficult features')
-    tag_array = df.Tag.unique().tolist()
-    df['TagNum'] = df['Tag'].apply(lambda x: Tag2Num(x, tag_array))
+
+    #If the mode is training then the part of speech is converted to a number and a list of the order is stored
+    if mode == 'TRAIN':
+        POS_array = df.POS.unique().tolist()
+        df['POSNum'] = df['POS'].apply(lambda x: Array2Num(x, POS_array))
+        POS_file = open('./data/process/POS_array.txt', 'w')
+        POS_file.write(str(POS_array))
+        POS_file.close()
+
+    #If the mode is prediction or evaluation then the stored list is loaded and converts each POS to a number
+    elif mode == 'PREDICT' or mode == 'EVAL':
+        POS_numfile = open('./data/process/POS_array.txt', 'r')
+        POS_array = POS_numfile.read()
+        POS_array = POS_array.strip("[]")
+        POS_array = POS_array.split(',')
+        for idx, word in enumerate(POS_array):
+            if word == " '":
+                POS_array[idx] = ','
+            else:
+                new_word = word.strip()
+                new_word = new_word.strip("''")
+                POS_array[idx] = new_word
+        POS_array.pop(POS_array.index(',') + 1)
+        df['POSNum'] = df['POS'].apply(lambda x: POS_array.index(x))
+
     word_array = df.Word.unique().tolist()
     df['frontWord'] = df['Unnamed: 0'].apply(lambda x: frontWord(x, word_array, df))
 
     df['backWord'] = df['Unnamed: 0'].apply(lambda x: backWord(x, word_array, df))
 
-    logging.info('All features done... saving to file')
+    #If the mode is for training and not predicting...
+    # Generates tag num from tag name,
+    #Saves the tag array so it will be used later to change the predicted tags nums to tags
+    if mode == 'TRAIN':
+        tag_array = df.Tag.unique().tolist()
+        tag_file = open('./data/process/tag_array.txt', 'w')
+        tag_file.write(str(tag_array))
+        tag_file.close()
+        df['TagNum'] = df['Tag'].apply(lambda x: Array2Num(x, tag_array))
+    
+        
+        logging.info('All features done... saving to file')
 
-    #Saves the new dataframe as a csv file    
-    df.to_csv(Dconfig.FEATURES_DATASET_PATH, encoding = 'unicode-escape')
+        #Saves the new dataframe as a csv file  
+        df.to_csv(Dconfig.FEATURES_DATASET_PATH, encoding = 'unicode-escape')
 
+    #If the mode is full evaluation, then TagNum is made from the tag_array file
+    elif mode == 'EVAL':
+        tag_file = open('./data/process/tag_array.txt', 'r')
+        tag_array = tag_file.read()
+        tag_array = tag_array.strip("[]")
+        tag_array = tag_array.split(',')
+        for idx, word in enumerate(tag_array):
+                new_word = word.strip()
+                new_word = new_word.strip("''")
+                tag_array[idx] = new_word
+        df['TagNum'] = df['Tag'].apply(lambda x: tag_array.index(x))
+
+    #else if the mode is for prediction, returns the df
+    elif mode == 'PREDICT':
+        logging.info('All features done... sending dataframe over')
+        return df
 
 def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
     '''
@@ -139,10 +220,10 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
         train_df = df.copy().drop(drop_list)
 
         #takes the data and labels of the training and testing sets, and puts them in txt files
-        data_train = train_df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
+        data_train = train_df[['isFirstCap', 'Length', 'POSNum', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
         label_train = train_df['TagNum'].values
-        data_test = test_df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
+        data_test = test_df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
         label_test = test_df['TagNum'].values
 
@@ -158,7 +239,7 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         #Takes all of the data and splits the data from label columns and saves them in txt files
         #for testing
-        data_test = df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
+        data_test = df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
         label_test = df['TagNum'].values
         np.savetxt(Dconfig.DATA_TEST_PATH, data_test)
@@ -171,7 +252,7 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         #Takes all of the data and splits the data from label columns and saves them in txt files
         #for training
-        data_train = df[['isFirstCap', 'Length', 'endY', 'isNNP', 'isJJ', 'isCD', 'otherCap', 'endan',
+        data_train = df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
         label_train = df['TagNum'].values
         np.savetxt(Dconfig.DATA_TRAIN_PATH, data_train)
@@ -185,19 +266,38 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
 
 #argparse code to allow command line functionality
-parser = argparse.ArgumentParser(description='Methods for feature generation and splitting of data')
-parser.add_argument("command", metavar="<command>", help="'feature_gen' or 'split' or 'split_eval' or 'split_train'",)
-args = parser.parse_args()
-assert args.command in ['feature_gen', 'split', 'split_eval', 'split_train'], "invalid parsing 'command'"
+def main():
+    parser = argparse.ArgumentParser(description='Methods for feature generation and splitting of data')
+    parser.add_argument("-c", metavar="<command>", help="'feature_gen' or 'split' or 'split_eval' or 'split_train'",)
+    parser.add_argument("-f", metavar="filename", help="input file",)
+    parser.add_argument("-m", metavar="mode", help="'EVAL', 'TRAIN', or BOTH",)
+    parser.add_argument("-fgm", metavar="feature_gen mode", help="'EVAL' or None",)
+    args = parser.parse_args()
+    assert args.c in ['feature_gen', 'split'], "invalid parsing 'command'"
 
-if args.command == "feature_gen":
-        feature_gen()      
-elif args.command == "split":
-        data_split()
-elif args.command == "split_eval":
-    data_split(mode = 'EVAL')
-else:
-    data_split(mode = 'TRAIN')
+    if args.c == "feature_gen":
+        if args.fgm == None:
+            if args.f == None:
+                feature_gen()
+            else:
+                feature_gen(filename = args.f)
+        else:
+            if args.f == None:
+                feature_gen(mode = args.fgm)
+            else:
+                feature_gen(filename = args.f, mode = args.fgm)
+        
+    else:
+        if args.m == None:
+            data_split()
+        elif args.m == 'EVAL' or args.m == 'TRAIN' or args.m == 'BOTH':
+            data_split(mode = args.m)
+        else:
+            logging.info('Please enter a valid mode')
+
+if __name__ == "__main__":
+    main()
+        
 
 
 

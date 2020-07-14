@@ -42,37 +42,37 @@ conda install --file installation/requirements.txt
 
 ### Feature Generation and Data Splitting
 
-1) In anaconda navigate to the folder using cd command and then type this:
+1) In anaconda navigate to the folder using cd command and then type this: (-f filename is not required) (-fgm EVAL is if you are doing a full evaluation)
 ```
-python src/dataset.py feature_gen
+python src/dataset.py -c feature_gen -f filename -fgm EVAL
 ```
 
 2) This generates features for the data and saves it for a new file. For the data, put in the the data/original folder, and change
 the filepath according in data_config.py file. Next, you split the data using this:
 ```
-python src/dataset.py split
+python src/dataset.py -c split -m BOTH
 ```
 
 2a) Other versions of data splitting would be having all the data being training set and all the data being testing for evaluation purposes.
 For complete training set use:
 ```
-python src/dataset.py split_train
+python src/dataset.py -c split -m TRAIN
 ```
 And for complete testing:
 ```
-python src/dataset.py split_eval
+python src/dataset.py -c split -m EVAL
 ```
 
 ### Training and Evaluating Data
 
-1) Unless you plan to only evaluate the data (all testing). In anaconda navigate to the folder using cd and then type:
+1) Unless you plan to only evaluate the data (all testing). In anaconda navigate to the folder using cd and then type: (-mf modelfile isn't required)
 ```
-python src/tags.py train
+python src/tags.py -c train -mf modelfile
 ```
 
-2) From there you should have a model built, where unless you are only making a model type:
+2) From there you should have a model built, where unless you are only making a model type: (-mf modelfile isn't required)
 ```
-python src/tags.py evaluate
+python src/tags.py -c evaluate -fm modelfile
 ```
 
 3) If you want to fine tune the parameters or have your own model, then you can change the filepath and parameters in the model_config script
@@ -82,9 +82,9 @@ python src/tags.py evaluate
 1) For predicting data, you only need a csv with the word, part of speech, and a column named "Unnamed: 0" which is the number word.
 Put the file into the data folder and change the filepath in data_config script.
 
-2) Type this into anaconda:
+2) Type this into anaconda: (-f file isn't required)
 ```
-ipython src/tags.py predict
+ipython src/tags.py -c predict -f datafile
 ```
 
 2) Note: The data will be output into a new file named "New_Data.csv". To change this go to data_config and change it there.
