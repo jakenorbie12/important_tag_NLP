@@ -93,7 +93,7 @@ def predict(pred_file = Dconfig.PRED_DATASET_PATH):
         logging.info('Done generating features')
 
         #Uses the features to create a viable dataset
-        data = df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
+        data = df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
            'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
 
         #Loads in the model

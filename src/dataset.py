@@ -122,6 +122,7 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
 
     #If the mode is training then the part of speech is converted to a number and a list of the order is stored
     if mode == 'TRAIN':
+        #POS_array gives a list of the POS in order of coming up
         POS_array = df.POS.unique().tolist()
         df['POSNum'] = df['POS'].apply(lambda x: Array2Num(x, POS_array))
         POS_file = open('./data/process/POS_array.txt', 'w')
@@ -143,6 +144,7 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
                 POS_array[idx] = new_word
         POS_array.pop(POS_array.index(',') + 1)
         df['POSNum'] = df['POS'].apply(lambda x: POS_array.index(x))
+    
 
     word_array = df.Word.unique().tolist()
     df['frontWord'] = df['Unnamed: 0'].apply(lambda x: frontWord(x, word_array, df))
@@ -182,6 +184,7 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
         logging.info('All features done... sending dataframe over')
         return df
 
+
 def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
     '''
     Splits the data into training and testing batches, and saves them
@@ -220,11 +223,11 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
         train_df = df.copy().drop(drop_list)
 
         #takes the data and labels of the training and testing sets, and puts them in txt files
-        data_train = train_df[['isFirstCap', 'Length', 'POSNum', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
+        data_train = train_df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
+                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
         label_train = train_df['TagNum'].values
-        data_test = test_df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
+        data_test = test_df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
+                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
         label_test = test_df['TagNum'].values
 
         np.savetxt(Dconfig.DATA_TRAIN_PATH, data_train)
@@ -239,8 +242,8 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         #Takes all of the data and splits the data from label columns and saves them in txt files
         #for testing
-        data_test = df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
+        data_test = df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
+                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
         label_test = df['TagNum'].values
         np.savetxt(Dconfig.DATA_TEST_PATH, data_test)
         np.savetxt(Dconfig.LABEL_TEST_PATH, label_test)
@@ -252,8 +255,8 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         #Takes all of the data and splits the data from label columns and saves them in txt files
         #for training
-        data_train = df[['isFirstCap', 'Length', 'endY', 'POSNum', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
+        data_train = df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
+                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
         label_train = df['TagNum'].values
         np.savetxt(Dconfig.DATA_TRAIN_PATH, data_train)
         np.savetxt(Dconfig.LABEL_TRAIN_PATH, label_train)
