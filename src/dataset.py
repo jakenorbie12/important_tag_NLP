@@ -3,7 +3,9 @@
 #===============================================================================
 import pandas as pd
 import numpy as np
+from gensim.models import Word2Vec, KeyedVectors
 import random
+import nltk
 import os
 import sys
 import logging
@@ -12,6 +14,9 @@ ROOT_DIR = os.path.abspath("./config")
 sys.path.append(ROOT_DIR)
 import data_config as Dconfig
 import argparse
+
+#For First Time Only
+#nltk.download('punkt')
 
 logging.basicConfig(level=logging.INFO)
 
@@ -129,6 +134,14 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
         POS_file.write(str(POS_array))
         POS_file.close()
 
+        word_data = df['Word'].values
+        word_vec = [nltk.word_tokenize(title) for title in word_data]
+        model = Word2Vec(word_vec, size=24, window=5, min_count=0, workers=4)
+        model.save('./data/process/word2vec.model')
+        wv = KeyedVectors.load('./data/process/word2vec.model')
+        for i in range(24):
+            df['WordVector' + str(i)] = df['Word'].apply(lambda x: wv[x][i] if x in wv else None)
+
     #If the mode is prediction or evaluation then the stored list is loaded and converts each POS to a number
     elif mode == 'PREDICT' or mode == 'EVAL':
         POS_numfile = open('./data/process/POS_array.txt', 'r')
@@ -222,12 +235,17 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
         drop_list = test_df['Unnamed: 0'].tolist()
         train_df = df.copy().drop(drop_list)
 
+        feature_list = ['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
+                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']
+        vectorlist = []
+        for i in range(24):
+            vectorlist.append('WordVector' + str(i))
+        feature_list = feature_list + vectorlist
+
         #takes the data and labels of the training and testing sets, and puts them in txt files
-        data_train = train_df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
+        data_train = train_df[feature_list].values
         label_train = train_df['TagNum'].values
-        data_test = test_df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
+        data_test = test_df[feature_list].values
         label_test = test_df['TagNum'].values
 
         np.savetxt(Dconfig.DATA_TRAIN_PATH, data_train)
