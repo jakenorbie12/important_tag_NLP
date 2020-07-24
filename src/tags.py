@@ -93,8 +93,14 @@ def predict(pred_file = Dconfig.PRED_DATASET_PATH):
         logging.info('Done generating features')
 
         #Uses the features to create a viable dataset
-        data = df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
-           'isNum', 'endS', 'endish', 'endese', 'propVow', 'frontWord', 'backWord']].values
+        feature_list = ['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
+                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']
+        vectorlist = []
+        for i in range(24):
+                vectorlist.append('WordVector' + str(i))
+        feature_list = feature_list + vectorlist
+        
+        data = df[feature_list].values
 
         #Loads in the model
         light_model = lgb.Booster(model_file = Mconfig.MODEL_PATH)

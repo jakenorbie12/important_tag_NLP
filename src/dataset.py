@@ -123,6 +123,15 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
     for f in function_dict:
         df[f] = df['Word'].apply(lambda x: function_dict[f](x))
 
+    #Word2Vec takes in tokenized words and vectorizes them into 24 vectors, in which they are put into 24 difffernt columns
+    word_data = df['Word'].values
+    word_vec = [nltk.word_tokenize(title) for title in word_data]
+    model = Word2Vec(word_vec, size=24, window=5, min_count=0, workers=4)
+    model.save('./data/process/word2vec.model')
+    wv = KeyedVectors.load('./data/process/word2vec.model')
+    for i in range(24):
+        df['WordVector' + str(i)] = df['Word'].apply(lambda x: wv[x][i] if x in wv else None)
+
     logging.info('Simple features have been generated, moving on to difficult features')
 
     #If the mode is training then the part of speech is converted to a number and a list of the order is stored
@@ -134,13 +143,6 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
         POS_file.write(str(POS_array))
         POS_file.close()
 
-        word_data = df['Word'].values
-        word_vec = [nltk.word_tokenize(title) for title in word_data]
-        model = Word2Vec(word_vec, size=24, window=5, min_count=0, workers=4)
-        model.save('./data/process/word2vec.model')
-        wv = KeyedVectors.load('./data/process/word2vec.model')
-        for i in range(24):
-            df['WordVector' + str(i)] = df['Word'].apply(lambda x: wv[x][i] if x in wv else None)
 
     #If the mode is prediction or evaluation then the stored list is loaded and converts each POS to a number
     elif mode == 'PREDICT' or mode == 'EVAL':
@@ -211,6 +213,13 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
     logging.info('Data Splitting has begun.')
     df = pd.read_csv(filename, encoding='unicode_escape')
 
+    feature_list = ['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
+                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']
+    vectorlist = []
+    for i in range(24):
+        vectorlist.append('WordVector' + str(i))
+    feature_list = feature_list + vectorlist
+
     #If the mode is set to both training and testing
     if mode == "BOTH":
 
@@ -260,8 +269,7 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         #Takes all of the data and splits the data from label columns and saves them in txt files
         #for testing
-        data_test = df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
+        data_test = df[feature_list].values
         label_test = df['TagNum'].values
         np.savetxt(Dconfig.DATA_TEST_PATH, data_test)
         np.savetxt(Dconfig.LABEL_TEST_PATH, label_test)
@@ -273,8 +281,7 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
         #Takes all of the data and splits the data from label columns and saves them in txt files
         #for training
-        data_train = df[['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
-                   'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']].values
+        data_train = df[feature_list].values
         label_train = df['TagNum'].values
         np.savetxt(Dconfig.DATA_TRAIN_PATH, data_train)
         np.savetxt(Dconfig.LABEL_TRAIN_PATH, label_train)
