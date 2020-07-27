@@ -18,3 +18,12 @@ PARAMETERS['subsample'] = 0.9
 PARAMETERS['subsample_freq'] = 20
 
 MODEL_PATH = './models/model.txt'
+
+#Change these to edit the options available for optimal parameters
+GRID_SEARCH_PARAM_GRID = {
+    'colsample_bytree': [0.7, 0.8],
+    'max_depth': [15,20,25],
+    'num_leaves': [50, 100, 200],
+    'subsample': [0.7, 0.8, 0.9],
+    'subsample_freq': [20]
+}
