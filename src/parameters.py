@@ -4,6 +4,7 @@
 import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
+import lightgbm as lgb
 import os
 import sys
 import logging
@@ -46,7 +47,6 @@ def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
         verbose=2
     )
 
-    logging.info('Completed testing, now fitting and returning model and pred')
     
     #Fits the best model
     fitted_model = gs.fit(X_train_data, y_train_data)
@@ -58,6 +58,7 @@ def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
       pred = fitted_model.predict(X_test_data)
 
     #Returns the fitted model and predicted labels
+    logging.info('Completed testing, now fitting and returning model and pred')
     return fitted_model, pred
 
 def opt_mod(param_path = Mconfig.GRID_SEARCH_PARAM_GRID):
@@ -87,31 +88,42 @@ def opt_mod(param_path = Mconfig.GRID_SEARCH_PARAM_GRID):
     #Prints the best score and parameters fields
     logging.info('Now showing optimal parameters: ')
     logging.info(model.best_params_)
-    logging.info('')
+    logging.info('---------------------------------')
 
     logging.info('Now showing best score: ')
     logging.info(model.best_score_)
-    #print(model.best_score_)
-    #print(model.best_params_)
+    logging.info('---------------------------------')
 
+    logging.info('Writing in optimal parameters')
+    f = open('./config/model_config.py', 'r')
+    lines = f.readlines()
+    f.close()
+    f = open('./config/model_config.py', 'w')
+    for line in lines:
+        if 'GRID_SEARCH_USED = ' in line:
+            f.write('GRID_SEARCH_USED = True\n')
+        elif 'OPT_PARAMS =' in line:
+            f.write('OPT_PARAMS = ' + str(model.best_params_) + '\n')
+        else:
+            f.write(line)      
+    f.close()
 
 
 #argparse code to allow command line functionality
-def main():
-    parser = argparse.ArgumentParser(description='Hypertesting Parameters Function')
-    parser.add_argument("-c", metavar="<command>", help="'opt_mod'",)
-    parser.add_argument("-pf", metavar="parameters file", help="parameters file path",)
+parser = argparse.ArgumentParser(description='Hypertesting Parameters Function')
+parser.add_argument("-c", metavar="<command>", help="'opt_mod'",)
+parser.add_argument("-pf", metavar="parameters file", help="parameters file path",)
 
-    args = parser.parse_args()
-    assert args.c in ['opt_mod'], "invalid parsing 'command'"
+args = parser.parse_args()
+assert args.c in ['opt_mod'], "invalid parsing 'command'"
 
-    if args.c == "opt_mod":
-        if args.pf == None:
-            opt_mod()
-        else:
-            opt_mod(args.pf)
+if args.c == 'opt_mod':
+    if args.pf == None:
+        opt_mod()
     else:
-        logging.info('Please enter a valid command')
+        opt_mod(args.pf)
+else:
+    logging.info('Please enter a valid command')
 
 
 

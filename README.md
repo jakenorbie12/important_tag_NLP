@@ -63,6 +63,13 @@ And for complete testing:
 python src/dataset.py -c split -m EVAL
 ```
 
+### Optional. GridSearchCV optimization of parameters
+
+1) If you want to optimize parameters, then use this command: (-pf paramfile is for parameter filepath if you already have one)
+```
+python src/parameters.py -c opt_mod -pf paramfile
+```
+
 ### Training and Evaluating Data
 
 1) Unless you plan to only evaluate the data (all testing). In anaconda navigate to the folder using cd and then type: (-mf modelfile isn't required)
@@ -88,6 +95,7 @@ ipython src/tags.py -c predict -f datafile
 ```
 
 2) Note: The data will be output into a new file named "New_Data.csv". To change this go to data_config and change it there.
+
 
 ## Troubleshooting
 

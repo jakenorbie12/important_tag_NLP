@@ -34,7 +34,10 @@ def train(model_path = Mconfig.MODEL_PATH):
         #Forms the data and labels into a dataset, and takes parameters
         #into a form that can be put into lightGBM
         d_train = lgb.Dataset(data_train, label=label_train)
+
         params = Mconfig.PARAMETERS
+        if Mconfig.GRID_SEARCH_USED:   
+                params.update(Mconfig.OPT_PARAMS)
 
         #Using lightGBM, trains a model
         mod = lgb.train(params, d_train, 100)
