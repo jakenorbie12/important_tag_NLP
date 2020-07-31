@@ -124,13 +124,13 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
         df[f] = df['Word'].apply(lambda x: function_dict[f](x))
 
     #Word2Vec takes in tokenized words and vectorizes them into 24 vectors, in which they are put into 24 difffernt columns
-    word_data = df['Word'].values
+    word_data = df['Word'].values.tolist()
     word_vec = [nltk.word_tokenize(title) for title in word_data]
     model = Word2Vec(word_vec, size=24, window=5, min_count=0, workers=4)
     model.save('./data/process/word2vec.model')
     wv = KeyedVectors.load('./data/process/word2vec.model')
     for i in range(24):
-        df['WordVector' + str(i)] = df['Word'].apply(lambda x: wv[x][i] if x in wv else None)
+        df['WordVector' + str(i)] = df['Word'].apply(lambda x: wv[x][i] if x in wv else 0)
 
     logging.info('Simple features have been generated, moving on to difficult features')
 
@@ -179,7 +179,7 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
         
         logging.info('All features done... saving to file')
 
-        #Saves the new dataframe as a csv file  
+        #Saves the new dataframe as a csv file
         df.to_csv(Dconfig.FEATURES_DATASET_PATH, encoding = 'unicode-escape')
 
     #If the mode is full evaluation, then TagNum is made from the tag_array file
@@ -211,7 +211,7 @@ def data_split(filename = Dconfig.FEATURES_DATASET_PATH, mode = "BOTH"):
 
     #Reads the featured csv file and writes it in as a Pandas dataframe
     logging.info('Data Splitting has begun.')
-    df = pd.read_csv(filename, encoding='unicode_escape')
+    df = pd.read_csv(filename, encoding = 'unicode-escape')
 
     feature_list = ['isFirstCap', 'Length', 'endY', 'otherCap', 'endan',
                    'isNum', 'endS', 'endish', 'endese', 'propVow', 'POSNum', 'frontWord', 'backWord']
