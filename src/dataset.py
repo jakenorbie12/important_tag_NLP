@@ -180,7 +180,7 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
         logging.info('All features done... saving to file')
 
         #Saves the new dataframe as a csv file
-        df.to_csv(Dconfig.FEATURES_DATASET_PATH, encoding = 'unicode-escape')
+        df.to_csv(Dconfig.FEATURES_DATASET_PATH, encoding = 'utf-8')
 
     #If the mode is full evaluation, then TagNum is made from the tag_array file
     elif mode == 'EVAL':
