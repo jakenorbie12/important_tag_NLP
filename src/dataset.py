@@ -125,8 +125,14 @@ def feature_gen(filename = Dconfig.DATASET_PATH, mode = 'TRAIN', data = None):
 
     #Word2Vec takes in tokenized words and vectorizes them into 24 vectors, in which they are put into 24 difffernt columns
     word_data = df['Word'].values.tolist()
-    word_vec = [nltk.word_tokenize(title) for title in word_data]
-    model = Word2Vec(word_vec, size=24, window=5, min_count=0, workers=4)
+    #word_vec = [nltk.word_tokenize(title) for title in word_data]
+    size = len(word_data) 
+    idx_list = [idx + 1 for idx, val in
+        enumerate(word_data) if val == '.'] 
+    res = [word_data[i: j] for i, j in
+        zip([0] + idx_list, idx_list + 
+        ([size] if idx_list[-1] != size else []))] 
+    model = Word2Vec(res, size=24, window=5, min_count=0, workers=4)
     model.save('./data/process/word2vec.model')
     wv = KeyedVectors.load('./data/process/word2vec.model')
     for i in range(24):
